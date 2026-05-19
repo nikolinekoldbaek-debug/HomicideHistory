@@ -1,8 +1,11 @@
 ---
 title: "Are we more civilized today?"
-author: "Adela Sobotkova"
-date: " created 4 October 2021, updated ..."
-output: html_document
+author: "Jules"
+date: "Created 4 October 2021, updated `r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
@@ -56,12 +59,12 @@ Ok, the data look good except for the column `Homicide rate in Europe over long-
 - Use the `names()` function and assignment key to relabel this column to `homicides_per_100k` 
 
 
-```{r relabel column}
+```{r relabel-column}
 # names() function produces the names of columns as a character vector with 4 elements
 names(Western_Europe)
 
 # If we can select the fourth element, we can also rename it / reassign a name to it
-names(Western_Europe)[4] <- "bettername"
+names(Western_Europe)[4] <- "homicides_per_100k"
 
 # check the new name!
 names(Western_Europe)
@@ -78,17 +81,15 @@ Now, that you have looked at what the data looks like and what it represents, an
 - provide meaningful title and axis labels
 - remember to change the `eval` flag so that the code chunk renders when knitted 
 
-```{r plot-homicides, eval = FALSE}
-# option 1 - this one embeds the dataset in the ggplot as the first argument
-ggplot(data = Western_Europe, x = _______, y = ________) +
-  #....CONTINUE WITH YOUR OWN CODE
-
-
-# option 2 - this one starts with the dataset and continues with ggplot()
+```{r plot-homicides, eval = TRUE}
 Western_Europe %>% 
-  ggplot(....)+
-  #....CONTINUE WITH YOUR OWN CODE
-
+  ggplot(aes(x = Year, y = homicides_per_100k, color = Entity)) +
+  geom_line() +
+  labs(title = "Long-term Homicide Rates in Western Europe",
+       x = "Year",
+       y = "Homicides per 100,000 people",
+       color = "Entity") +
+  theme_minimal()
 ```
 Alright, the homicide rates should all be descending over time. What a comfort. But the viz is not super clear. Let's check the rates for individual countries.
 
@@ -101,9 +102,17 @@ You can visualize each country's trend separately by adding an extra argument to
 - change the facet "layout" to two columns and three rows so that the trends are easier to see in horizontal layout. 
 
 
-```{r eval = FALSE}
-#... YOUR CODE
-
+```{r facet-homicides, eval = TRUE}
+Western_Europe %>%
+  ggplot(aes(x = Year, y = homicides_per_100k, color = Entity)) +
+  geom_line() +
+  facet_wrap(~ Entity, ncol = 2, nrow = 3) +
+  labs(title = "Homicide Rates in Western Europe by Country",
+       x = "Year",
+       y = "Homicides per 100,000 people",
+       color = "Country") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
 ```
 
 ## Compare the trends in homicide with the pattern of reign duration among Danish rulers through time.
@@ -115,12 +124,23 @@ You can visualize each country's trend separately by adding an extra argument to
 - Provide meaningful labels and a title
 - How would you characterize the trend compared to the homicides above?
 
-```{r eval = FALSE}
-# YOUR CODE HERE:
+```{r danish-kings-plot, eval = TRUE}
+kings <- read_csv("kings.csv")
+
+kings %>%
+  mutate(Duration = End_date - Start_date,
+         Midyear = End_date - Duration / 2) %>%
+  ggplot(aes(x = Midyear, y = Duration)) +
+  geom_point() +
+  geom_smooth() +
+  labs(title = "Reign Duration of Danish Monarchs Over Time",
+       x = "Midyear of Reign",
+       y = "Duration of Reign (Years)") +
+  theme_minimal()
 ```
 
 
-**Final tasks:**
+## Final tasks
 
 1) Plot: In the facetted plot above, move the legend from the current position on the side to below the facets, and label it "Country" instead of "Entity".
 
@@ -131,6 +151,17 @@ You can visualize each country's trend separately by adding an extra argument to
   - provide informative `chunk-names` and edit flags in your R chunks to `TRUE`, and
   - automatically generate a `timestamp` to show when the document was last updated. (Hint: check the Rmarkdown episode in our Data Carpentry tutorial)
 
-###  Final question: 
+## Final question:
 
-*In <250 words articulate your answer on the basis of the data visualisations to the following question*: **are we more civilized today?** 
+*In <250 words articulate your answer on the basis of the data visualisations to the following question*: **are we more civilized today?**
+
+The data visualization of homicide rates in Western Europe from 1300 to 2000 provides compelling evidence of a significant decline in interpersonal violence. Starting from highs often exceeding 20-50 homicides per 100,000 individuals in the late Middle Ages, the rates across all observed regions—Italy, England, Germany, Netherlands, and Scandinavia—have converged to approximately 1 per 100,000 in the modern era. This dramatic downward trend suggests that societies have developed more effective mechanisms for conflict resolution, stronger legal institutions, and a greater internalisation of non-violent norms over the centuries.
+
+Furthermore, when comparing this to the reign duration of Danish monarchs, we observe an increasing trend in the length of time rulers remained in power. Longer reign durations often correlate with increased political stability and a reduction in violent successions.
+
+While "civilized" is a complex and subjective term, if we define it by a reduction in lethal violence and an increase in social and political stability, then the data strongly suggests that we are indeed more civilized today than in the past. The transition from a world where violent death was a relatively common occurrence to one where it is a rare exception marks a profound shift in human exception.
+
+## Submission Information
+
+- **Github Repository URL:** [https://github.com/nikolinekoldbaek-debug/HomicideHistory](https://github.com/nikolinekoldbaek-debug/HomicideHistory)
+- **Knitted HTML (on Github):** [https://github.com/nikolinekoldbaek-debug/HomicideHistory/blob/main/EuropeanHomicide_exercise.html](https://github.com/nikolinekoldbaek-debug/HomicideHistory/blob/main/EuropeanHomicide_exercise.html)
