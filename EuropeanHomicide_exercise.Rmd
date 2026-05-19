@@ -1,136 +1,133 @@
 ---
 title: "Are we more civilized today?"
-author: "Adela Sobotkova"
-date: " created 4 October 2021, updated ..."
-output: html_document
+author: "Nikoline Koldbaek Kaiser"
+date: "`r paste('Last updated:', format(Sys.time(), '%d %B %Y, %H:%M'))`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE,
-                      message=FALSE)
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
 ```
-#  Explore Homicide rates in NW Europe
-In this exercise, you will load a Manuel Eisner's dataset that captures the developments in homicides from Middle Ages to 20th century. 
 
-**Your task: Explore the data and create visualisations as instructed in the script.** 
+# Explore Homicide rates in NW Europe
 
-- **Upload to Github this .Rmd file with solutions and its .html knitted version.**  
-- **Submit to Brightspace a document that follows the template and contains (1) URL of this script and its knitted version in Github, (2) one plot of your choice,  and (3) answer of 250 words to the Final Question.**
+In this exercise, I load Manuel Eisner's dataset that captures the developments in homicides from the Middle Ages to the 20th century. The goal is to explore the data and create visualisations that show whether homicide rates in Western Europe are lower or higher today than in the past.
 
-
-
-This exercise is based on the dataset provided by [OurWorldInData project](https://ourworldindata.org/homicides) based at the Oxford University.
+This exercise is based on the dataset provided by the [Our World in Data project](https://ourworldindata.org/homicides), based at the University of Oxford.
 
 ## The long-term trend in Homicides in Western Europe
 
-Understanding how homicide rates have changed prior to the modern era requires the help of historians and archivists. Manuel Eisner, a criminology professor at the University of Cambridge, and his colleagues published the Historical Violence Database \href{https://cjrc.osu.edu/research/interdisciplinary/hvd}: a compilation of data on long-term trends in homicide rates, in addition to qualitative information such as the cause of death, perpetrator and victim. This database is limited to countries with relatively complete historical records on violence and crime – mainly Western Europe and the US.
+Understanding how homicide rates have changed prior to the modern era requires the help of historians and archivists. Manuel Eisner, a criminology professor at the University of Cambridge, and his colleagues published the Historical Violence Database: a compilation of data on long-term trends in homicide rates, in addition to qualitative information such as the cause of death, perpetrator and victim.
 
-Starting in the second half of the nineteenth century, these European regions have consistent police records of those accused of murder or manslaughter and annual counts of homicide victims. To go back further in time, reaching as far back as the thirteenth century, Eisner collected estimates (from historical records of coroner reports, court trials, and the police) of homicide rates made in over ninety publications by scholars.
+Homicide rates are measured as the number of homicides per 100,000 individuals. The data up to 1990 are sourced from Eisner's publication and the Historical Violence Database, while the recent data are taken from the Institute for Health Metrics and Evaluation.
 
-Homicide rates – measured as the number of homicides per 100,000 individuals – up to 1990 are sourced from Eisner’s (2003) publication and the Historical Violence Database. 
-
-Are homicide rates in Europe today lower or higher than in the past? Using the provided dataset, display and describe the long-run homicide rates for the five European regions: Italy, England, Germany, Netherlands and Scandinavia.
-
-```{r library}
+```{r load-libraries}
 library(tidyverse)
 ```
 
 ## Load the available data from ourworldindata.org
 
-You should always interrogate the source of your data. Who compiled it, from where, what is missing, how representative the data are? Check the data/Metadata.txt to learn about the data provenance.
-
-```{r load-data}
+```{r load-homicide-data}
 Western_Europe <- read_csv("data/homicide-rates-across-western-europe.csv")
 ```
 
 ## Inspect the data
 
-How clean and analysis-ready is the dataset? Do you understand what the column names represent? What is the difference between rate and homicide number?
+The dataset is fairly clean and analysis-ready. `Entity` identifies the country or region, `Year` identifies the year of the observation, and the homicide-rate column gives the number of homicides per 100,000 people. A rate is useful because it adjusts for different population sizes; a raw homicide number would count the total number of deaths without adjusting for how many people lived in the country or region.
 
-```{r inspect}
+```{r inspect-homicide-data}
 head(Western_Europe)
-```
-
-Ok, the data look good except for the column `Homicide rate in Europe over long-term (per 100,000)` which is not very easy to work with.
-
-- Use the `names()` function and assignment key to relabel this column to `homicides_per_100k` 
-
-
-```{r relabel column}
-# names() function produces the names of columns as a character vector with 4 elements
 names(Western_Europe)
-
-# If we can select the fourth element, we can also rename it / reassign a name to it
-names(Western_Europe)[4] <- "bettername"
-
-# check the new name!
+names(Western_Europe)[4] <- "homicides_per_100k"
 names(Western_Europe)
+glimpse(Western_Europe)
 ```
 
-Now, that you have looked at what the data looks like and what it represents, and streamlined it, let's see what big picture it contains.
+## Long-term homicide trends
 
-## Let's see what the long-term trend is in homicides
-
-- use `ggplot()` function and remember the`+` at the end of the line
-- chose a meaningful `geom_......()`  for geometry (hint: points are not great)
-- load `Year` on the `x` axis and `homicides_per_100k` column in y axis
-- to color individual country entries consistently, assign the country column to the argument `color`.
-- provide meaningful title and axis labels
-- remember to change the `eval` flag so that the code chunk renders when knitted 
-
-```{r plot-homicides, eval = FALSE}
-# option 1 - this one embeds the dataset in the ggplot as the first argument
-ggplot(data = Western_Europe, x = _______, y = ________) +
-  #....CONTINUE WITH YOUR OWN CODE
-
-
-# option 2 - this one starts with the dataset and continues with ggplot()
-Western_Europe %>% 
-  ggplot(....)+
-  #....CONTINUE WITH YOUR OWN CODE
-
-```
-Alright, the homicide rates should all be descending over time. What a comfort. But the viz is not super clear. Let's check the rates for individual countries.
-
-## Uncouple the homicides of individual countries for easier view
-
-You can visualize each country's trend separately by adding an extra argument to the ggplot, the `facet_wrap()` and feeding it the country column. If in doubt, check your ggplot tutorial and your country column name for exact usage.
-
-- reuse the ggplot from the chunk above
-- insert `facet_wrap()` after the specification of geometry to split countries in separate charts
-- change the facet "layout" to two columns and three rows so that the trends are easier to see in horizontal layout. 
-
-
-```{r eval = FALSE}
-#... YOUR CODE
-
+```{r plot-homicide-trends, eval=TRUE}
+Western_Europe %>%
+  ggplot(aes(x = Year, y = homicides_per_100k, color = Entity)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.5) +
+  labs(
+    title = "Long-term homicide rates in Western Europe",
+    x = "Year",
+    y = "Homicides per 100,000 people",
+    color = "Country"
+  ) +
+  theme_minimal()
 ```
 
-## Compare the trends in homicide with the pattern of reign duration among Danish rulers through time.
+The overall pattern is strongly downward. In the medieval and early modern periods, homicide rates were much higher, especially in Italy, Scandinavia, and Germany/Switzerland. By the twentieth and twenty-first centuries, the rates in all five regions are much lower and closer together.
 
-- Load your Danish king dataset. Hopefully it is tidy and your years and duration of reign are all numeric.
-- You need to have a consistent way of plotting the rulers' reign on the x axis, so I recommend you create a midyear column by calculating the middle of each monarch's rule (Hint: `midyear` = `endyear` - (`endyear`-`startyear`)/2)
-- Start a ggplot plotting midyear on x axis and duration on y axis
-- Try `geom_smooth()` for geometry 
-- Provide meaningful labels and a title
-- How would you characterize the trend compared to the homicides above?
+## Individual country trends
 
-```{r eval = FALSE}
-# YOUR CODE HERE:
+```{r facetted-homicide-trends, eval=TRUE}
+final_homicide_plot <- Western_Europe %>%
+  ggplot(aes(x = Year, y = homicides_per_100k, color = Entity)) +
+  geom_line(linewidth = 1) +
+  geom_point(size = 1.3) +
+  facet_wrap(~ Entity, ncol = 2, nrow = 3) +
+  labs(
+    title = "Homicide rates declined sharply across Western Europe",
+    subtitle = "Rates are measured as homicides per 100,000 people",
+    x = "Year",
+    y = "Homicides per 100,000 people",
+    color = "Country"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    legend.position = "bottom",
+    panel.grid.minor = element_blank()
+  )
+
+final_homicide_plot
 ```
 
+The facetted plot makes the regional differences clearer. Italy starts with the highest homicide rates and also shows the steepest long-term drop. England, the Netherlands, Germany/Switzerland, and Scandinavia all show the same broad direction: a movement from historically high homicide rates to much lower modern rates.
 
-**Final tasks:**
+## Compare homicide trends with Danish rulers
 
-1) Plot: In the facetted plot above, move the legend from the current position on the side to below the facets, and label it "Country" instead of "Entity".
+```{r load-danish-kings-data, eval=TRUE}
+kings <- read_csv2("data/Kongeraekken2.csv")
 
-2) Rmarkdown: 
+kings_duration <- kings %>%
+  mutate(
+    Regerings_start = as.numeric(Regerings_start),
+    Regering_slut = as.numeric(Regering_slut),
+    duration = Regering_slut - Regerings_start,
+    midyear = Regering_slut - ((Regering_slut - Regerings_start) / 2)
+  ) %>%
+  filter(!is.na(duration), !is.na(midyear), duration >= 0)
 
-  - edit the author of the document, and convert 'Final Tasks' into heading #2 (like the other headings) 
-  - add a `floating table of contents` to your Rmarkdown document, 
-  - provide informative `chunk-names` and edit flags in your R chunks to `TRUE`, and
-  - automatically generate a `timestamp` to show when the document was last updated. (Hint: check the Rmarkdown episode in our Data Carpentry tutorial)
+head(kings_duration)
+```
 
-###  Final question: 
+```{r plot-danish-reign-duration, eval=TRUE}
+kings_duration %>%
+  ggplot(aes(x = midyear, y = duration)) +
+  geom_point(color = "#2f6f73", alpha = 0.75) +
+  geom_smooth(color = "#8f2d56", se = FALSE) +
+  labs(
+    title = "Duration of reign among Danish monarchs",
+    x = "Middle year of reign",
+    y = "Duration of reign in years"
+  ) +
+  theme_minimal(base_size = 12)
+```
 
-*In <250 words articulate your answer on the basis of the data visualisations to the following question*: **are we more civilized today?** 
+The Danish monarchy plot is more uneven than the homicide plot. Reign duration fluctuates because dynastic politics, wars, deaths, abdications, and succession arrangements all affect individual rulers. Still, compared with the homicide data, the smoother suggests somewhat more stability in later centuries. The homicide plots show a much clearer and stronger decline in violence over time.
+
+## Final tasks
+
+The final visualization I would submit is the facetted homicide plot above, because it directly answers the main question and makes the regional pattern easy to compare.
+
+### Final question
+
+On the basis of these visualisations, Europe does appear to have become more "civilized" if we define civilization narrowly as a decline in lethal interpersonal violence. The homicide data show a large long-term fall across England, Italy, Germany/Switzerland, the Netherlands, and Scandinavia. In the medieval and early modern periods, homicide rates were often many times higher than they are today. By the twentieth and twenty-first centuries, the regional lines converge at much lower levels, usually around one homicide per 100,000 people or less. That pattern suggests that everyday life became less likely to end in lethal violence.
+
+However, the answer depends on what "civilized" means. Homicide rates measure one important form of violence, but they do not measure all harm, injustice, war, colonial violence, domestic abuse, or state power. The Danish reign-duration plot also reminds us that political stability is uneven and cannot be reduced to one simple line of progress. So my answer is: yes, modern Western Europe looks more civilized in the specific sense that homicide became far less common, but the visualisations do not prove that society became morally superior in every respect. They show a major decline in recorded lethal violence, not the end of violence or human cruelty.
